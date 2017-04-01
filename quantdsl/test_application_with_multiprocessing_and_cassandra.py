@@ -6,10 +6,10 @@ from eventsourcing.infrastructure.stored_events.cassandra_stored_events import c
 
 from quantdsl.application.with_cassandra import DEFAULT_QUANTDSL_CASSANDRA_KEYSPACE
 from quantdsl.application.with_multiprocessing_and_cassandra import QuantDslApplicationWithMultiprocessingAndCassandra
-from quantdsl.test_application import TestCase, ContractValuationTests
+from quantdsl.test_application import TestCase, ContractValuationTestsTestCase
 
 
-class TestQuantDslApplicationWithMultiprocessingAndCassandra(TestCase, ContractValuationTests):
+class TestQuantDslApplicationWithMultiprocessingAndCassandra(TestCase, ContractValuationTestsTestCase):
 
     def tearDown(self):
         # Drop keyspace before closing the application.

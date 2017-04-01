@@ -5,10 +5,10 @@ import gevent
 import gevent.pool
 from gevent.queue import JoinableQueue
 
-from quantdsl.application.base import QuantDslApplication
+from quantdsl.application.base import QuantdslApplication
 
 
-class QuantDslApplicationWithGreenThreads(QuantDslApplication):
+class QuantDslApplicationWithGreenThreads(QuantdslApplication):
 
     def __init__(self, num_workers=100, *args, **kwargs):
         result_counters = {}

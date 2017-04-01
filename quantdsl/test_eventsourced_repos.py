@@ -1,11 +1,14 @@
 import datetime
 
 import scipy
-import six
+from eventsourcing.domain.model.events import assert_event_handlers_empty
+from eventsourcing.tests.sequenced_item_tests.test_sqlalchemy_active_record_strategy import \
+    WithSQLAlchemyActiveRecordStrategies
 
-from quantdsl.domain.model.call_dependencies import CallDependencies
-from quantdsl.domain.model.call_dependents import CallDependents
-from quantdsl.domain.model.call_requirement import CallRequirement, register_call_requirement
+from quantdsl.domain.model.call_dependencies import CallDependencies, call_dependencies_id_from_call_id
+from quantdsl.domain.model.call_dependents import CallDependents, call_dependents_id_from_call_id
+from quantdsl.domain.model.call_requirement import CallRequirement, register_call_requirement, \
+    call_requirement_id_from_call_id
 from quantdsl.domain.model.call_result import CallResult, register_call_result, make_call_result_id
 from quantdsl.domain.model.contract_specification import ContractSpecification
 from quantdsl.domain.model.dependency_graph import register_dependency_graph, DependencyGraph
@@ -13,10 +16,18 @@ from quantdsl.domain.model.market_calibration import MarketCalibration
 from quantdsl.domain.model.simulated_price import register_simulated_price, SimulatedPrice, make_simulated_price_id
 from quantdsl.domain.services.uuids import create_uuid4
 from quantdsl.services import DEFAULT_PRICE_PROCESS_NAME
-from quantdsl.test_application import TestCase
+from quantdsl.test_application import WithQuantdslApplication
 
 
-class TestEventSourcedRepos(TestCase):
+class TestEventSourcedRepos(WithSQLAlchemyActiveRecordStrategies, WithQuantdslApplication):
+
+    def setUp(self):
+        assert_event_handlers_empty()
+        super(TestEventSourcedRepos, self).setUp()
+        
+    def tearDown(self):
+        super(TestEventSourcedRepos, self).tearDown()
+        assert_event_handlers_empty()
 
     def test_register_market_calibration(self):
         price_process_name = DEFAULT_PRICE_PROCESS_NAME
@@ -35,7 +46,6 @@ class TestEventSourcedRepos(TestCase):
     def test_register_contract_specification(self):
         contract_spec = self.app.register_contract_specification('1 + 1')
         self.assertIsInstance(contract_spec, ContractSpecification)
-        self.assertIsInstance(contract_spec.id, six.string_types)
         contract_spec = self.app.contract_specification_repo[contract_spec.id]
         assert isinstance(contract_spec, ContractSpecification)
         self.assertEqual(contract_spec.specification, '1 + 1')
@@ -58,7 +68,7 @@ class TestEventSourcedRepos(TestCase):
         register_call_requirement(call_id=call_id, dsl_source=dsl_source,
                                   effective_present_time=effective_present_time)
 
-        call_requirement = self.app.call_requirement_repo[call_id]
+        call_requirement = self.app.call_requirement_repo[call_requirement_id_from_call_id(call_id)]
         assert isinstance(call_requirement, CallRequirement)
         self.assertEqual(call_requirement.dsl_source, dsl_source)
         self.assertEqual(call_requirement.effective_present_time, effective_present_time)
@@ -72,7 +82,7 @@ class TestEventSourcedRepos(TestCase):
 
         self.app.register_call_dependencies(call_id=call_id, dependencies=dependencies)
 
-        call_dependencies = self.app.call_dependencies_repo[call_id]
+        call_dependencies = self.app.call_dependencies_repo[call_dependencies_id_from_call_id(call_id)]
         assert isinstance(call_dependencies, CallDependencies)
         self.assertEqual(call_dependencies.dependencies, dependencies)
 
@@ -85,7 +95,7 @@ class TestEventSourcedRepos(TestCase):
 
         self.app.register_call_dependents(call_id=call_id, dependents=dependents)
 
-        call_dependents = self.app.call_dependents_repo[call_id]
+        call_dependents = self.app.call_dependents_repo[call_dependents_id_from_call_id(call_id)]
         assert isinstance(call_dependents, CallDependents)
         self.assertEqual(call_dependents.dependents, dependents)
 
@@ -111,11 +121,12 @@ class TestEventSourcedRepos(TestCase):
         simulation_id = create_uuid4()
         self.assertRaises(KeyError, self.app.simulated_price_repo.__getitem__, simulation_id)
 
-        price = register_simulated_price(simulation_id, '#1', price_time, price_value)
+        price = register_simulated_price(simulation_id, '#1', price_time, price_time, price_value)
 
         assert isinstance(price, SimulatedPrice), price
         assert price.id
-        price = self.app.simulated_price_repo[make_simulated_price_id(simulation_id, '#1', price_time)]
+        simulated_price_id = make_simulated_price_id(simulation_id, '#1', price_time, price_time)
+        price = self.app.simulated_price_repo[simulated_price_id]
         assert isinstance(price, SimulatedPrice)
         import numpy
         numpy.testing.assert_equal(price.value, price_value)

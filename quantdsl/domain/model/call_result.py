@@ -1,19 +1,20 @@
 # from multiprocessing.sharedctypes import SynchronizedArray
+import uuid
 from threading import Lock
+from uuid import UUID
 
 import scipy
-from eventsourcing.domain.model.entity import EventSourcedEntity, EntityRepository
+from quantdsl.domain.model.base import Entity
 from eventsourcing.domain.model.events import publish
 
 # from quantdsl.semantics import numpy_from_sharedmem
 
 
-class CallResult(EventSourcedEntity):
-
-    class Created(EventSourcedEntity.Created):
+class CallResult(Entity):
+    class Created(Entity.Created):
         pass
 
-    class Discarded(EventSourcedEntity.Discarded):
+    class Discarded(Entity.Discarded):
         pass
 
     def __init__(self, result_value, perturbed_values, contract_valuation_id, dependency_graph_id, **kwargs):
@@ -59,17 +60,14 @@ def register_call_result(call_id, result_value, perturbed_values, contract_valua
                                        # Todo: Also save the list of fixing dates separately (if needs to be saved).
                                        dependency_graph_id=dependency_graph_id,
                                        )
-    call_result = CallResult.mutator(event=created_event)
+    call_result = CallResult.mutate(event=created_event)
 
     publish(created_event)
     return call_result
 
 
 def make_call_result_id(contract_valuation_id, call_id):
-    assert contract_valuation_id, contract_valuation_id
-    assert call_id, call_id
-    return contract_valuation_id + call_id
+    return uuid.uuid5(NAMESPACE_CALL_RESULT_ID, str(contract_valuation_id) + str(call_id))
 
 
-class CallResultRepository(EntityRepository):
-    pass
+NAMESPACE_CALL_RESULT_ID = UUID('302c66cb-19b0-47fa-af00-56fce9d9930f')

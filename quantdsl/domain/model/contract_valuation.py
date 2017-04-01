@@ -1,14 +1,13 @@
-from eventsourcing.domain.model.entity import EventSourcedEntity, EntityRepository
+from quantdsl.domain.model.base import Entity
 from eventsourcing.domain.model.events import publish
 from quantdsl.domain.services.uuids import create_uuid4
 
 
-class ContractValuation(EventSourcedEntity):
-
-    class Created(EventSourcedEntity.Created):
+class ContractValuation(Entity):
+    class Created(Entity.Created):
         pass
 
-    class Discarded(EventSourcedEntity.Discarded):
+    class Discarded(Entity.Discarded):
         pass
 
     def __init__(self, market_simulation_id, dependency_graph_id, **kwargs):
@@ -31,7 +30,7 @@ def start_contract_valuation(entity_id, dependency_graph_id, market_simulation_i
         market_simulation_id=market_simulation_id,
         dependency_graph_id=dependency_graph_id,
     )
-    contract_valuation = ContractValuation.mutator(event=contract_valuation_created)
+    contract_valuation = ContractValuation.mutate(event=contract_valuation_created)
     publish(contract_valuation_created)
     return contract_valuation
 
@@ -40,5 +39,3 @@ def create_contract_valuation_id():
     return create_uuid4()
 
 
-class ContractValuationRepository(EntityRepository):
-    pass

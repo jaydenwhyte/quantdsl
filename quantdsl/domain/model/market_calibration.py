@@ -1,14 +1,13 @@
-from eventsourcing.domain.model.entity import EventSourcedEntity, EntityRepository
+from quantdsl.domain.model.base import Entity
 from eventsourcing.domain.model.events import publish
 from quantdsl.domain.services.uuids import create_uuid4
 
 
-class MarketCalibration(EventSourcedEntity):
-
-    class Created(EventSourcedEntity.Created):
+class MarketCalibration(Entity):
+    class Created(Entity.Created):
         pass
 
-    class Discarded(EventSourcedEntity.Discarded):
+    class Discarded(Entity.Discarded):
         pass
 
     def __init__(self, price_process_name, calibration_params, **kwargs):
@@ -29,7 +28,7 @@ def register_market_calibration(price_process_name, calibration_params):
     created_event = MarketCalibration.Created(entity_id=create_uuid4(),
                                               price_process_name=price_process_name,
                                               calibration_params=calibration_params)
-    call_result = MarketCalibration.mutator(event=created_event)
+    call_result = MarketCalibration.mutate(event=created_event)
     publish(created_event)
     return call_result
 
@@ -39,5 +38,3 @@ def compute_market_calibration_params(price_process_name, historical_data):
     return {}
 
 
-class MarketCalibrationRepository(EntityRepository):
-    pass

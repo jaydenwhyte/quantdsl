@@ -1,12 +1,7 @@
-import logging
-
-from eventsourcing.infrastructure.stored_events.cassandra_stored_events import setup_cassandra_connection, \
-    get_cassandra_setup_params
 from filelock import FileLock
 
-from quantdsl.application.base import QuantDslApplication
+from quantdsl.application.base import QuantdslApplication
 from quantdsl.application.main import get_quantdsl_app
-from quantdsl.application.with_cassandra import DEFAULT_QUANTDSL_CASSANDRA_KEYSPACE
 from quantdsl.infrastructure.celery.app import celery_app
 
 
@@ -37,7 +32,7 @@ def celery_evaluate_call(dependency_graph_id, contract_valuation_id, call_id):
 
     quantdsl_app = get_quant_dsl_app_for_celery_worker()
 
-    assert isinstance(quantdsl_app, QuantDslApplication)
+    assert isinstance(quantdsl_app, QuantdslApplication)
 
     quantdsl_app.evaluate_call_and_queue_next_calls(
         contract_valuation_id=contract_valuation_id,

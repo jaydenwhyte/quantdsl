@@ -1,14 +1,13 @@
-from eventsourcing.domain.model.entity import EventSourcedEntity, EntityRepository
+from quantdsl.domain.model.base import Entity
 from eventsourcing.domain.model.events import publish
 from quantdsl.domain.services.uuids import create_uuid4
 
 
-class ContractSpecification(EventSourcedEntity):
-
-    class Created(EventSourcedEntity.Created):
+class ContractSpecification(Entity):
+    class Created(Entity.Created):
         pass
 
-    class Discarded(EventSourcedEntity.Discarded):
+    class Discarded(Entity.Discarded):
         pass
 
     def __init__(self, specification, **kwargs):
@@ -21,14 +20,15 @@ class ContractSpecification(EventSourcedEntity):
 
 
 def register_contract_specification(specification):
-    created_event = ContractSpecification.Created(entity_id=create_uuid4(), specification=specification)
-    contract_specification = ContractSpecification.mutator(event=created_event)
+    created_event = ContractSpecification.Created(
+        entity_id=create_uuid4(),
+        specification=specification,
+    )
+    contract_specification = ContractSpecification.mutate(event=created_event)
     publish(created_event)
     return contract_specification
 
 
-def make_simulated_price_id(simulation_id, market_name, price_time, delivery_time=''):
-    return simulation_id + market_name + str(price_time) + str(delivery_time)
+# Todo: Rename market_name to commodity_name?
 
-class ContractSpecificationRepository(EntityRepository):
-    pass
+

@@ -1,29 +1,10 @@
-import unittest
-from tempfile import NamedTemporaryFile
-
-import os
-
-from quantdsl.application.with_multiprocessing_and_sqlalchemy import QuantDslApplicationWithMultiprocessingAndSQLAlchemy
-from quantdsl.test_application import TestCase, ContractValuationTests
+from eventsourcing.tests.sequenced_item_tests.test_sqlalchemy_active_record_strategy import \
+    WithSQLAlchemyActiveRecordStrategies
 
 
-class TestQuantDslApplicationWithMultiprocessingAndSQLAlchemy(TestCase, ContractValuationTests):
-
-    def setup_application(self):
-        tempfile = NamedTemporaryFile()
-        self.tempfile_name = tempfile.name
-        tempfile.close()
-        self.app = QuantDslApplicationWithMultiprocessingAndSQLAlchemy(
-            num_workers=self.NUMBER_WORKERS,
-            db_uri='sqlite:///'+self.tempfile_name
-        )
-
-    def tearDown(self):
-        super(TestQuantDslApplicationWithMultiprocessingAndSQLAlchemy, self).tearDown()
-        os.unlink(self.tempfile_name)
+from quantdsl.test_application import ContractValuationTestsTestCase
 
 
-if __name__ == '__main__':
-    unittest.main()
-
-
+class TestQuantDslApplicationWithMultiprocessingAndSQLAlchemy(WithSQLAlchemyActiveRecordStrategies,
+                                                              ContractValuationTestsTestCase):
+    use_named_temporary_file = True

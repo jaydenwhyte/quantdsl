@@ -2,10 +2,10 @@ from cassandra.cqlengine.management import drop_keyspace
 from eventsourcing.infrastructure.stored_events.cassandra_stored_events import create_cassandra_keyspace_and_tables
 
 from quantdsl.application.with_cassandra import QuantDslApplicationWithCassandra, DEFAULT_QUANTDSL_CASSANDRA_KEYSPACE
-from quantdsl.test_application import TestCase, ContractValuationTests
+from quantdsl.test_application import TestCase, ContractValuationTestsTestCase
 
 
-class TestQuantDslApplicationWithCassandra(TestCase, ContractValuationTests):
+class TestQuantDslApplicationWithCassandra(TestCase, ContractValuationTestsTestCase):
 
     def setup_application(self):
         self.app = QuantDslApplicationWithCassandra()

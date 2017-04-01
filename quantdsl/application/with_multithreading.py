@@ -7,10 +7,10 @@ except ImportError:
 
 from threading import Thread
 
-from quantdsl.application.base import QuantDslApplication
+from quantdsl.application.base import QuantdslApplication
 
 
-class QuantDslApplicationWithMultithreading(QuantDslApplication):
+class QuantDslApplicationWithMultithreading(QuantdslApplication):
 
     def __init__(self, num_workers, *args, **kwargs):
         # Todo: Refactor the counter logic into a class, or find something that already does this. Perhaps use range.
